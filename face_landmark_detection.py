@@ -74,14 +74,14 @@ faces_folder_path = sys.argv[2]
 
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor(predictor_path)
-win = dlib.image_window()
+#win = dlib.image_window()
 
-for f in glob.glob(os.path.join(faces_folder_path, "*.jpg")):
+for i, f in enumerate(glob.glob(os.path.join(faces_folder_path, "*.jpg"))):
     print("Processing file: {}".format(f))
     img = cv2.imread(f)
 
-    win.clear_overlay()
-    win.set_image(img)
+#    win.clear_overlay()
+#    win.set_image(img)
 
     # Ask the detector to find the bounding boxes of each face. The 1 in the
     # second argument indicates that we should upsample the image 1 time. This
@@ -128,7 +128,6 @@ for f in glob.glob(os.path.join(faces_folder_path, "*.jpg")):
                                     (225.0, 170.0, -135.0),      # Right eye right corne
                                     (-150.0, -150.0, -125.0),    # Left Mouth corner
                                     (150.0, -150.0, -125.0)      # Right mouth corner
-                                 
                                 ])
          
          
@@ -142,13 +141,13 @@ for f in glob.glob(os.path.join(faces_folder_path, "*.jpg")):
                                  [0, 0, 1]], dtype = "double"
                                  )
          
-        print("Camera Matrix :\n {0}".format(camera_matrix))
+    #    print("Camera Matrix :\n {0}".format(camera_matrix))
          
         dist_coeffs = np.zeros((4,1)) # Assuming no lens distortion
         (success, rotation_vector, translation_vector) = cv2.solvePnP(model_points, image_points, camera_matrix, dist_coeffs, flags=cv2.SOLVEPNP_ITERATIVE)
          
-        print("Rotation Vector:\n {0}".format(rotation_vector))
-        print("Translation Vector:\n {0}".format(translation_vector))
+#        print("Rotation Vector:\n {0}".format(rotation_vector))
+#        print("Translation Vector:\n {0}".format(translation_vector))
          
          
         # Project a 3D point (0, 0, 1000.0) onto the image plane.
@@ -167,13 +166,13 @@ for f in glob.glob(os.path.join(faces_folder_path, "*.jpg")):
         cv2.line(img, p1, p2, (255,0,0), 2)
          
         # Display image
-        cv2.imshow("Output", img)
-        cv2.waitKey(0)
+    cv2.imwrite("output/out"+str(i)+".jpg", img)
+        #cv2.waitKey(0)
 
         # NOTE: HEAD POSE ESTIMATION END
 
         # Draw the face landmarks on the screen.
-        win.add_overlay(shape)
+#        win.add_overlay(shape)
 
-    win.add_overlay(dets)
+#    win.add_overlay(dets)
     dlib.hit_enter_to_continue()
