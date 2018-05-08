@@ -50,6 +50,8 @@
 #       pip install scikit-image
 #   Or downloaded from http://scikit-image.org/download.html. 
 
+# deneme
+
 import sys
 import os
 import dlib
