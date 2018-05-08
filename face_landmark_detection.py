@@ -54,7 +54,7 @@ import sys
 import os
 import dlib
 import glob
-from skimage import io
+#from skimage import io
 import numpy as np
 import cv2
 
@@ -78,7 +78,7 @@ win = dlib.image_window()
 
 for f in glob.glob(os.path.join(faces_folder_path, "*.jpg")):
     print("Processing file: {}".format(f))
-    img = io.imread(f)
+    img = cv2.imread(f)
 
     win.clear_overlay()
     win.set_image(img)
@@ -89,26 +89,26 @@ for f in glob.glob(os.path.join(faces_folder_path, "*.jpg")):
     dets = detector(img, 1)
     print("Number of faces detected: {}".format(len(dets)))
     for k, d in enumerate(dets):
-        print("Detection {}: Left: {} Top: {} Right: {} Bottom: {}".format(
-            k, d.left(), d.top(), d.right(), d.bottom()))
+#        print("Detection {}: Left: {} Top: {} Right: {} Bottom: {}".format(
+#            k, d.left(), d.top(), d.right(), d.bottom()))
         # Get the landmarks/parts for the face in box d.
         shape = predictor(img, d)
-        print("Part 0: {}, Part 1: {} ...".format(shape.part(0),
-                                                  shape.part(1)))
+#        print("Part 0: {}, Part 1: {} ...".format(shape.part(0),
+#                                                  shape.part(1)))
 
         # coordinates of necessary landmarks
-        print("left eye: {}".format(shape.part(36)))
-        print("right eye: {}".format(shape.part(45)))
-        print("tip of nose: {}".format(shape.part(33)))
-        print("left side of lip: {}".format(shape.part(48)))
-        print("right side of lip: {}".format(shape.part(54)))
-        print("chin: {}".format(shape.part(8)))
+#        print("left eye: {}".format(shape.part(36)))
+#        print("right eye: {}".format(shape.part(45)))
+#        print("tip of nose: {}".format(shape.part(33)))
+#        print("left side of lip: {}".format(shape.part(48)))
+#        print("right side of lip: {}".format(shape.part(54)))
+#        print("chin: {}".format(shape.part(8)))
 
         # NOTE: HEAD POSE ESTIMATION START
 
         # Read Image
-        im = cv2.imread(f);
-        size = im.shape
+      #  im = cv2.imread(f);
+        size = img.shape
              
         #2D image points. If you change the image, you need to change vector
         image_points = np.array([
@@ -158,16 +158,16 @@ for f in glob.glob(os.path.join(faces_folder_path, "*.jpg")):
         (nose_end_point2D, jacobian) = cv2.projectPoints(np.array([(0.0, 0.0, 1000.0)]), rotation_vector, translation_vector, camera_matrix, dist_coeffs)
          
         for p in image_points:
-            cv2.circle(im, (int(p[0]), int(p[1])), 3, (0,0,255), -1)
+            cv2.circle(img, (int(p[0]), int(p[1])), 3, (0,0,255), -1)
          
          
         p1 = ( int(image_points[0][0]), int(image_points[0][1]))
         p2 = ( int(nose_end_point2D[0][0][0]), int(nose_end_point2D[0][0][1]))
          
-        cv2.line(im, p1, p2, (255,0,0), 2)
+        cv2.line(img, p1, p2, (255,0,0), 2)
          
         # Display image
-        cv2.imshow("Output", im)
+        cv2.imshow("Output", img)
         cv2.waitKey(0)
 
         # NOTE: HEAD POSE ESTIMATION END
