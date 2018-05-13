@@ -50,8 +50,11 @@
 #       pip install scikit-image
 #   Or downloaded from http://scikit-image.org/download.html. 
 
-# deneme
-
+from imutils.video import VideoStream
+from imutils import face_utils
+import datetime
+import imutils
+import time
 import sys
 import os
 import dlib
@@ -60,58 +63,28 @@ import glob
 import numpy as np
 import cv2
 
-if len(sys.argv) != 3:
-    print(
-        "Give the path to the trained shape predictor model as the first "
-        "argument and then the directory containing the facial images.\n"
-        "For example, if you are in the python_examples folder then "
-        "execute this program by running:\n"
-        "    ./face_landmark_detection.py shape_predictor_68_face_landmarks.dat ../examples/faces\n"
-        "You can download a trained facial shape predictor from:\n"
-        "    http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2")
+if len(sys.argv) != 2:
+    print("invalid arg count")
     exit()
 
 predictor_path = sys.argv[1]
-faces_folder_path = sys.argv[2]
 
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor(predictor_path)
-#win = dlib.image_window()
+vs = VideoStream().start()
+time.sleep(2.0)
 
-for i, f in enumerate(glob.glob(os.path.join(faces_folder_path, "*.jpg"))):
-    print("Processing file: {}".format(f))
-    img = cv2.imread(f)
+while True:
+    frame = vs.read()
+    frame = imutils.resize(frame, width=400)
 
-#    win.clear_overlay()
-#    win.set_image(img)
+    #gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    rects = detector(frame, 1)
+    for rect in rects:
+        shape = predictor(frame, rect)
+        #shape = face_utils.shape_to_np(shape)
+        size = frame.shape
 
-    # Ask the detector to find the bounding boxes of each face. The 1 in the
-    # second argument indicates that we should upsample the image 1 time. This
-    # will make everything bigger and allow us to detect more faces.
-    dets = detector(img, 1)
-    print("Number of faces detected: {}".format(len(dets)))
-    for k, d in enumerate(dets):
-#        print("Detection {}: Left: {} Top: {} Right: {} Bottom: {}".format(
-#            k, d.left(), d.top(), d.right(), d.bottom()))
-        # Get the landmarks/parts for the face in box d.
-        shape = predictor(img, d)
-#        print("Part 0: {}, Part 1: {} ...".format(shape.part(0),
-#                                                  shape.part(1)))
-
-        # coordinates of necessary landmarks
-#        print("left eye: {}".format(shape.part(36)))
-#        print("right eye: {}".format(shape.part(45)))
-#        print("tip of nose: {}".format(shape.part(33)))
-#        print("left side of lip: {}".format(shape.part(48)))
-#        print("right side of lip: {}".format(shape.part(54)))
-#        print("chin: {}".format(shape.part(8)))
-
-        # NOTE: HEAD POSE ESTIMATION START
-
-        # Read Image
-      #  im = cv2.imread(f);
-        size = img.shape
-             
         #2D image points. If you change the image, you need to change vector
         image_points = np.array([
                                     (shape.part(30).x,shape.part(30).y),     # Nose tip
@@ -132,9 +105,7 @@ for i, f in enumerate(glob.glob(os.path.join(faces_folder_path, "*.jpg"))):
                                     (150.0, -150.0, -125.0)      # Right mouth corner
                                 ])
          
-         
         # Camera internals
-         
         focal_length = size[1]
         center = (size[1]/2, size[0]/2)
         camera_matrix = np.array(
@@ -143,38 +114,28 @@ for i, f in enumerate(glob.glob(os.path.join(faces_folder_path, "*.jpg"))):
                                  [0, 0, 1]], dtype = "double"
                                  )
          
-    #    print("Camera Matrix :\n {0}".format(camera_matrix))
-         
         dist_coeffs = np.zeros((4,1)) # Assuming no lens distortion
         (success, rotation_vector, translation_vector) = cv2.solvePnP(model_points, image_points, camera_matrix, dist_coeffs, flags=cv2.SOLVEPNP_ITERATIVE)
-         
-#        print("Rotation Vector:\n {0}".format(rotation_vector))
-#        print("Translation Vector:\n {0}".format(translation_vector))
-         
          
         # Project a 3D point (0, 0, 1000.0) onto the image plane.
         # We use this to draw a line sticking out of the nose
          
-         
         (nose_end_point2D, jacobian) = cv2.projectPoints(np.array([(0.0, 0.0, 1000.0)]), rotation_vector, translation_vector, camera_matrix, dist_coeffs)
          
         for p in image_points:
-            cv2.circle(img, (int(p[0]), int(p[1])), 3, (0,0,255), -1)
+            cv2.circle(frame, (int(p[0]), int(p[1])), 3, (0,0,255), -1)
          
          
-        p1 = ( int(image_points[0][0]), int(image_points[0][1]))
-        p2 = ( int(nose_end_point2D[0][0][0]), int(nose_end_point2D[0][0][1]))
+        p1 = (int(image_points[0][0]), int(image_points[0][1]))
+        p2 = (int(nose_end_point2D[0][0][0]), int(nose_end_point2D[0][0][1]))
          
-        cv2.line(img, p1, p2, (255,0,0), 2)
-         
-        # Display image
-    cv2.imwrite("output/out"+str(i)+".jpg", img)
-        #cv2.waitKey(0)
+        cv2.line(frame, p1, p2, (255,0,0), 2)
+    cv2.imwrite("IYO.jpg", frame)
 
-        # NOTE: HEAD POSE ESTIMATION END
+    cv2.imshow("Frame", frame)
+    key = cv2.waitKey(1) & 0xFF
+    if key == ord("q"):
+        break
 
-        # Draw the face landmarks on the screen.
-#        win.add_overlay(shape)
-
-#    win.add_overlay(dets)
-    dlib.hit_enter_to_continue()
+cv2.destroyAllWindows()
+vs.stop()
