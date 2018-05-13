@@ -78,10 +78,10 @@ while True:
     frame = vs.read()
     frame = imutils.resize(frame, width=400)
 
-    #gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    rects = detector(frame, 1)
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    rects = detector(gray, 1)
     for rect in rects:
-        shape = predictor(frame, rect)
+        shape = predictor(gray, rect)
         #shape = face_utils.shape_to_np(shape)
         size = frame.shape
 
